@@ -1,14 +1,17 @@
+package com.autovermietung;
+
+
 public class Car {
     private Long id;
     private String brand;
     private String model;
-    private double pricePerDAy;
+    private double pricePerDay;
 
-    public Car(Long id, String brand, String model, double pricePerDAy){
+    public Car(Long id, String brand, String model, double pricePerDay) {
         this.id = id;
         this.brand = brand;
         this.model = model;
-        this.pricePerDAy = pricePerDAy;
+        this.pricePerDay = pricePerDay;
     }
 
     public Long getId() {
@@ -23,6 +26,7 @@ public class Car {
         return model;
     }
 
-    public double getPricePerDAy() {
-        return pricePerDAy;
+    public double getPricePerDay() {
+        return pricePerDay;
     }
+}
