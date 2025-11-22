@@ -10,7 +10,7 @@ description = 'Spring Boot Projekt zur Verwaltung von Mietwagen'
 
 java {
 	toolchain {
-		languageVersion = JavaLanguageVersion.of(25)
+		languageVersion = JavaLanguageVersion.of(23)
 	}
 }
 
