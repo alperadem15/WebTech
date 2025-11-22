@@ -1,12 +1,13 @@
 # --- Build Stage ---
-FROM gradle:8.10-jdk-25 AS build
+FROM eclipse-temurin:25-jdk AS build
 WORKDIR /app
 
-# Copy Gradle config first for caching
-COPY build.gradle settings.gradle gradlew /app/
+# Copy Gradle wrapper and build files
+COPY gradlew build.gradle settings.gradle /app/
 COPY gradle /app/gradle
 
 # Download dependencies
+RUN chmod +x gradlew
 RUN ./gradlew dependencies --no-daemon || true
 
 # Copy source code
@@ -24,4 +25,4 @@ COPY --from=build /app/build/libs/*.jar app.jar
 
 EXPOSE 8080
 
-ENTRYPOINT ["java","-jar","app.jar"]
+ENTRYPOINT ["java", "-jar", "app.jar"]
