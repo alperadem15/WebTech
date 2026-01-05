@@ -3,8 +3,11 @@ package com.autovermietung.web;
 import com.autovermietung.Car;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.CrossOrigin;
+
 import java.util.List;
 
+@CrossOrigin(origins = "https://frontendwebtech-oq0k.onrender.com")
 @RestController
 public class CarController {
 
