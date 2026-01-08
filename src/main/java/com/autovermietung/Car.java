@@ -1,32 +1,47 @@
 package com.autovermietung;
 
+import com.autovermietung.user.Autovermieter;
 
 public class Car {
+
     private Long id;
     private String brand;
     private String model;
     private double pricePerDay;
+    private Autovermieter owner;
+    private boolean rented; // NEU: zeigt, ob Auto gemietet ist
 
-    public Car(Long id, String brand, String model, double pricePerDay) {
+    // Konstruktor
+    public Car(Long id, String brand, String model, double pricePerDay, Autovermieter owner) {
         this.id = id;
         this.brand = brand;
         this.model = model;
         this.pricePerDay = pricePerDay;
+        this.owner = owner;
+        this.rented = false; // standardmäßig verfügbar
     }
 
-    public Long getId() {
-        return id;
-    }
+    // Getter
+    public Long getId() { return id; }
+    public String getBrand() { return brand; }
+    public String getModel() { return model; }
+    public double getPricePerDay() { return pricePerDay; }
+    public Autovermieter getOwner() { return owner; }
+    public boolean isRented() { return rented; }
 
-    public String getBrand() {
-        return brand;
-    }
+    // Setter für rented
+    public void setRented(boolean rented) { this.rented = rented; }
 
-    public String getModel() {
-        return model;
-    }
-
-    public double getPricePerDay() {
-        return pricePerDay;
+    // Optional: ToString für Debug
+    @Override
+    public String toString() {
+        return "Car{" +
+                "id=" + id +
+                ", brand='" + brand + '\'' +
+                ", model='" + model + '\'' +
+                ", pricePerDay=" + pricePerDay +
+                ", owner=" + owner.getFirmenname() +
+                ", rented=" + rented +
+                '}';
     }
 }
