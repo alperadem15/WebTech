@@ -29,7 +29,9 @@ public class Car {
     public Autovermieter getOwner() { return owner; }
     public boolean isRented() { return rented; }
 
-    // Setter für rented
+    // Setter
+    public void setId(Long id) { this.id = id; }
+    public void setOwner(Autovermieter owner) { this.owner = owner; }
     public void setRented(boolean rented) { this.rented = rented; }
 
     // Optional: ToString für Debug
