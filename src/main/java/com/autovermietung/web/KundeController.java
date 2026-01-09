@@ -1,10 +1,10 @@
 package com.autovermietung.web;
 
-import com.autovermietung.Car;
 import com.autovermietung.user.Kunde;
+import com.autovermietung.user.KundeRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -13,52 +13,33 @@ import java.util.Optional;
 @RequestMapping("/kunde")
 public class KundeController {
 
-    // Mock-Liste aller Kunden
-    private final List<Kunde> kundeList = new ArrayList<>();
-    // Mock-Liste aller Autos
-    private final List<Car> cars = new ArrayList<>(); //  aus CarController injecten
-
-    private Long nextKundeId = 1L;
+    @Autowired
+    private KundeRepository kundeRepository;
 
     // Registrierung
     @PostMapping("/register")
     public Kunde register(@RequestBody Kunde kunde) {
-        kunde.setId(nextKundeId++);
-        kundeList.add(kunde);
-        return kunde;
+        // prüfen, ob Email schon existiert
+        Optional<Kunde> existing = kundeRepository.findByEmail(kunde.getEmail());
+        if (existing.isPresent()) {
+            throw new RuntimeException("Email bereits registriert!");
+        }
+        return kundeRepository.save(kunde);
     }
 
-    // Login (mock)
+    // Login
     @PostMapping("/login")
     public String login(@RequestBody Kunde loginRequest) {
-        Optional<Kunde> user = kundeList.stream()
-                .filter(k -> k.getEmail().equals(loginRequest.getEmail())
-                        && k.getPassword().equals(loginRequest.getPassword()))
-                .findFirst();
-        return user.isPresent() ? "Login erfolgreich!" : "Email oder Passwort falsch!";
-    }
-
-    // Auto mieten (mock)
-    @PostMapping("/rent/{autoId}")
-    public String rentCar(@PathVariable Long autoId) {
-        for (Car car : cars) {
-            if (car.getId().equals(autoId)) {
-                if (car.isRented()) {
-                    return "Dieses Auto ist bereits vermietet!";
-                } else {
-                    car.setRented(true);
-                    return "Auto " + car.getBrand() + " " + car.getModel() + " wurde gemietet!";
-                }
-            }
+        Optional<Kunde> kunde = kundeRepository.findByEmail(loginRequest.getEmail());
+        if (kunde.isPresent() && kunde.get().getPassword().equals(loginRequest.getPassword())) {
+            return "Login erfolgreich!";
         }
-        return "Auto nicht gefunden!";
+        return "Email oder Passwort falsch!";
     }
 
-    // verfügbare Autos anzeigen
-    @GetMapping("/cars/available")
-    public List<Car> getAvailableCars() {
-        return cars.stream()
-                .filter(car -> !car.isRented())
-                .toList();
+    // Alle Kunden (optional)
+    @GetMapping("/all")
+    public List<Kunde> getAllKunden() {
+        return kundeRepository.findAll();
     }
 }

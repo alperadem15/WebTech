@@ -1,66 +1,56 @@
 package com.autovermietung.web;
 
 import com.autovermietung.Car;
+import com.autovermietung.CarRepository;
 import com.autovermietung.user.Autovermieter;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
-@CrossOrigin(origins = "https://frontendwebtech-oq0k.onrender.com")
 @RestController
+@CrossOrigin(origins = "https://frontendwebtech-oq0k.onrender.com")
+@RequestMapping("/cars")
 public class CarController {
 
-    // Mock-Vermieter für Demo
-    private final Autovermieter vermieter1 = new Autovermieter(1L, "vermieter1@mail.de", "secret", "Autohaus Müller");
-    private final Autovermieter vermieter2 = new Autovermieter(2L, "vermieter2@mail.de", "secret", "Premium Cars GmbH");
+    @Autowired
+    private CarRepository carRepository;
 
-    // Mock-Autos (ArrayList, damit wir rented ändern können)
-    private final List<Car> cars = new ArrayList<>(List.of(
-            new Car(1L, "VW", "Tiguan", 99.99, vermieter1),
-            new Car(2L, "Mercedes-Benz", "S500", 350.00, vermieter2),
-            new Car(3L, "Tesla", "Model S", 150.00, vermieter1)
-    ));
-
-    //  Alle Autos
-    @GetMapping("/cars")
+    // Alle Autos
+    @GetMapping
     public List<Car> getAllCars() {
-        return cars;
+        return carRepository.findAll();
     }
 
     // Autos eines bestimmten Vermieters
-    @GetMapping("/cars/vermieter/{id}")
-    public List<Car> getCarsByVermieter(@PathVariable Long id) {
-        return cars.stream()
-                .filter(car -> car.getOwner().getId().equals(id))
-                .collect(Collectors.toList());
+    @GetMapping("/vermieter/{ownerId}")
+    public List<Car> getCarsByOwner(@PathVariable Long ownerId) {
+        return carRepository.findByOwnerId(ownerId);
     }
 
-    // Auto mieten (mock)
-    @GetMapping("/cars/rent/{id}")
-    public String rentCar(@PathVariable Long id) {
-        for (Car car : cars) {
-            if (car.getId().equals(id)) {
-                if (car.isRented()) {
-                    return "Dieses Auto ist bereits vermietet!";
-                } else {
-                    car.setRented(true);
-                    return "Auto " + car.getBrand() + " " + car.getModel() + " wurde gemietet!";
-                }
-            }
-        }
-        return "Auto nicht gefunden!";
-    }
-
-    // nur verfügbare Autos anzeigen
-    @GetMapping("/cars/available")
+    // Nur verfügbare Autos
+    @GetMapping("/available")
     public List<Car> getAvailableCars() {
-        return cars.stream()
-                .filter(car -> !car.isRented())
-                .collect(Collectors.toList());
+        return carRepository.findByRentedFalse();
+    }
+
+    // Auto mieten
+    @PostMapping("/rent/{id}")
+    public String rentCar(@PathVariable Long id) {
+        return carRepository.findById(id)
+                .map(car -> {
+                    if (car.isRented()) return "Dieses Auto ist bereits vermietet!";
+                    car.setRented(true);
+                    carRepository.save(car);
+                    return "Auto " + car.getBrand() + " " + car.getModel() + " wurde gemietet!";
+                })
+                .orElse("Auto nicht gefunden!");
+    }
+
+    // Neues Auto hinzufügen
+    @PostMapping("/add")
+    public Car addCar(@RequestBody Car car) {
+        car.setRented(false); // standardmäßig verfügbar
+        return carRepository.save(car);
     }
 }

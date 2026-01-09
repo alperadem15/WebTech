@@ -1,14 +1,21 @@
 package com.autovermietung.user;
 
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "kunden")
 public class Kunde extends User {
 
+    @Column(nullable = false)
     private String vorname;
+
+    @Column(nullable = false)
     private String nachname;
 
     public Kunde() {}
 
-    public Kunde(Long id, String email, String password, String vorname, String nachname) {
-        super(id, email, password);
+    public Kunde(String email, String password, String vorname, String nachname) {
+        super(email, password);
         this.vorname = vorname;
         this.nachname = nachname;
     }

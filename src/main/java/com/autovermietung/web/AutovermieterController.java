@@ -2,66 +2,51 @@ package com.autovermietung.web;
 
 import com.autovermietung.Car;
 import com.autovermietung.user.Autovermieter;
+import com.autovermietung.user.AutovermieterRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @CrossOrigin(origins = "https://frontendwebtech-oq0k.onrender.com")
 @RequestMapping("/vermieter")
 public class AutovermieterController {
 
-    // Mock-Liste aller Vermieter
-    private final List<Autovermieter> vermieterList = new ArrayList<>();
-    // Mock-Liste aller Autos
-    private final List<Car> cars = new ArrayList<>();
+    @Autowired
+    private AutovermieterRepository vermieterRepository;
 
-    private Long nextVermieterId = 1L;
-    private Long nextCarId = 1L;
+    @Autowired
+    private CarController carController; // für Autos des Vermieters
 
     // Registrierung
     @PostMapping("/register")
     public Autovermieter register(@RequestBody Autovermieter vermieter) {
-        vermieter.setId(nextVermieterId++);
-        vermieterList.add(vermieter);
-        return vermieter;
+        return vermieterRepository.save(vermieter);
     }
 
-    // Login (mock)
+    // Login
     @PostMapping("/login")
     public String login(@RequestBody Autovermieter loginRequest) {
-        Optional<Autovermieter> user = vermieterList.stream()
-                .filter(v -> v.getEmail().equals(loginRequest.getEmail())
-                        && v.getPassword().equals(loginRequest.getPassword()))
-                .findFirst();
-        return user.isPresent() ? "Login erfolgreich!" : "Email oder Passwort falsch!";
+        return vermieterRepository.findByEmail(loginRequest.getEmail())
+                .filter(v -> v.getPassword().equals(loginRequest.getPassword()))
+                .map(v -> "Login erfolgreich!")
+                .orElse("Email oder Passwort falsch!");
     }
 
     // Auto hinzufügen
     @PostMapping("/{vermieterId}/addCar")
     public Car addCar(@PathVariable Long vermieterId, @RequestBody Car newCar) {
-        Optional<Autovermieter> owner = vermieterList.stream()
-                .filter(v -> v.getId().equals(vermieterId))
-                .findFirst();
-
-        if (owner.isPresent()) {
-            newCar.setRented(false);
-            newCar.setId(nextCarId++);
-            newCar.setOwner(owner.get());
-            cars.add(newCar);
-            return newCar;
-        } else {
-            throw new RuntimeException("Vermieter nicht gefunden!");
-        }
+        Autovermieter owner = vermieterRepository.findById(vermieterId)
+                .orElseThrow(() -> new RuntimeException("Vermieter nicht gefunden!"));
+        newCar.setRented(false);
+        newCar.setOwner(owner);
+        return carController.addCar(newCar); // CarController speichert in DB
     }
 
     // alle Autos eines Vermieters
     @GetMapping("/{vermieterId}/cars")
     public List<Car> getCars(@PathVariable Long vermieterId) {
-        return cars.stream()
-                .filter(car -> car.getOwner().getId().equals(vermieterId))
-                .toList();
+        return carController.getCarsByOwner(vermieterId);
     }
 }

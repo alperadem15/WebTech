@@ -1,15 +1,24 @@
 package com.autovermietung.user;
 
+import jakarta.persistence.*;
+
+@MappedSuperclass
 public abstract class User {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     protected Long id;
+
+    @Column(nullable = false, unique = true)
     protected String email;
+
+    @Column(nullable = false)
     protected String password;
 
     public User() {}
 
-    public User(Long id, String email, String password) {
-        this.id = id;
+    // Konstruktor für neue Objekte ohne ID (die DB setzt die ID)
+    public User(String email, String password) {
         this.email = email;
         this.password = password;
     }
