@@ -2,7 +2,6 @@ package com.autovermietung.web;
 
 import com.autovermietung.Car;
 import com.autovermietung.CarRepository;
-import com.autovermietung.user.Autovermieter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,7 +33,36 @@ public class CarController {
         return carRepository.findByRentedFalse();
     }
 
-    // Auto mieten
+    // Neues Auto hinzufügen
+    @PostMapping
+    public Car addCar(@RequestBody Car car) {
+        car.setRented(false);
+        return carRepository.save(car);
+    }
+
+    // Auto löschen (nur Owner darf löschen)
+    @DeleteMapping("/{id}")
+    public void deleteCar(@PathVariable Long id, @RequestParam Long ownerId) {
+        Car car = carRepository.findByIdAndOwnerId(id, ownerId)
+                .orElseThrow(() -> new RuntimeException("Auto nicht gefunden oder nicht dein Auto!"));
+
+        carRepository.delete(car);
+    }
+
+    // Mietstatus setzen (nur Owner darf ändern)
+    @PatchMapping("/{id}/rented")
+    public Car setRented(@PathVariable Long id,
+                         @RequestParam boolean rented,
+                         @RequestParam Long ownerId) {
+
+        Car car = carRepository.findByIdAndOwnerId(id, ownerId)
+                .orElseThrow(() -> new RuntimeException("Auto nicht gefunden oder nicht dein Auto!"));
+
+        car.setRented(rented);
+        return carRepository.save(car);
+    }
+
+    // Auto mieten (Kunde)
     @PostMapping("/rent/{id}")
     public String rentCar(@PathVariable Long id) {
         return carRepository.findById(id)
@@ -45,12 +73,5 @@ public class CarController {
                     return "Auto " + car.getBrand() + " " + car.getModel() + " wurde gemietet!";
                 })
                 .orElse("Auto nicht gefunden!");
-    }
-
-    // Neues Auto hinzufügen
-    @PostMapping("/add")
-    public Car addCar(@RequestBody Car car) {
-        car.setRented(false); // standardmäßig verfügbar
-        return carRepository.save(car);
     }
 }

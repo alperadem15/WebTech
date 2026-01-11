@@ -27,12 +27,24 @@ public class AutovermieterController {
 
     // Login
     @PostMapping("/login")
-    public String login(@RequestBody Autovermieter loginRequest) {
-        return vermieterRepository.findByEmail(loginRequest.getEmail())
-                .filter(v -> v.getPassword().equals(loginRequest.getPassword()))
-                .map(v -> "Login erfolgreich!")
-                .orElse("Email oder Passwort falsch!");
+    public LoginResponse login(@RequestBody Autovermieter loginRequest) {
+        Autovermieter v = vermieterRepository.findByEmail(loginRequest.getEmail())
+                .filter(x -> x.getPassword().equals(loginRequest.getPassword()))
+                .orElseThrow(() -> new RuntimeException("Email oder Passwort falsch!"));
+
+        return new LoginResponse(v.getId(), "Login erfolgreich!");
     }
+
+    public static class LoginResponse {
+        public Long vermieterId;
+        public String message;
+
+        public LoginResponse(Long vermieterId, String message) {
+            this.vermieterId = vermieterId;
+            this.message = message;
+        }
+    }
+
 
     // Auto hinzufügen
     @PostMapping("/{vermieterId}/addCar")
