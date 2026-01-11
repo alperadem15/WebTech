@@ -15,7 +15,7 @@ public class Autovermieter extends User {
 
     public Autovermieter() {}
 
-    public Autovermieter(Long id, String email, String password, String firmenname) {
+    public Autovermieter(String email, String password, String firmenname) {
         super(id, email, password);
         this.firmenname = firmenname;
     }
