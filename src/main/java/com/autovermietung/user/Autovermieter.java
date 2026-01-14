@@ -1,6 +1,7 @@
 package com.autovermietung.user;
 
 import com.autovermietung.Car;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import java.util.List;
 
@@ -11,7 +12,8 @@ public class Autovermieter extends User {
     private String firmenname;
 
     @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Car> cars; // Alle Autos des Vermieters
+    @JsonManagedReference
+    private List<Car> cars;
 
     public Autovermieter() {}
 
@@ -21,7 +23,6 @@ public class Autovermieter extends User {
         this.firmenname = firmenname;
     }
 
-    // Getter & Setter
     public String getFirmenname() { return firmenname; }
     public void setFirmenname(String firmenname) { this.firmenname = firmenname; }
 

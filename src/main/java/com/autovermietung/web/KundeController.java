@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@CrossOrigin(origins = "https://frontendwebtech-oq0k.onrender.com")
 @RequestMapping("/kunde")
 public class KundeController {
 
