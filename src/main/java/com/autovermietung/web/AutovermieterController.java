@@ -1,6 +1,7 @@
 package com.autovermietung.web;
 
 import com.autovermietung.Car;
+import com.autovermietung.CarRepository;
 import com.autovermietung.user.Autovermieter;
 import com.autovermietung.user.AutovermieterRepository;
 import org.springframework.beans.factory.annotation.Autowired;
