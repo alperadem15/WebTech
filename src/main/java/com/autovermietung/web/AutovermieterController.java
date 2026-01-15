@@ -2,6 +2,8 @@ package com.autovermietung.web;
 
 import com.autovermietung.Car;
 import com.autovermietung.CarRepository;
+import com.autovermietung.Umsatz;
+import com.autovermietung.UmsatzRepository;
 import com.autovermietung.user.Autovermieter;
 import com.autovermietung.user.AutovermieterRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -74,7 +76,7 @@ public class AutovermieterController {
                 ))
                 .toList();
 
-        double gesamt = rows.stream().mapToDouble(Umsatz::getAmount).sum();
+        double gesamt = rows.stream().mapToDouble(r -> r.getAmount()).sum();
 
         return new UmsatzResponse(gesamt, events);
     }

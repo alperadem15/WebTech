@@ -2,6 +2,8 @@ package com.autovermietung.web;
 
 import com.autovermietung.Car;
 import com.autovermietung.CarRepository;
+import com.autovermietung.Umsatz;
+import com.autovermietung.UmsatzRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
