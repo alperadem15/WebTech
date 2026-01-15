@@ -50,4 +50,26 @@ public class AutovermieterController {
     public List<Car> getCars(@PathVariable Long vermieterId) {
         return carRepository.findByOwnerId(vermieterId);
     }
+
+    // --- Umsatz DTOs ---
+    public record UmsatzEvent(String carName, double amount, String date) {}
+    public record UmsatzResponse(double gesamtUmsatz, List<UmsatzEvent> events) {}
+
+    @GetMapping("/{vermieterId}/umsatz")
+    public UmsatzResponse getUmsatz(@PathVariable Long vermieterId) {
+
+        //  Vermieter existiert? (sicherer Check)
+        vermieterRepository.findById(vermieterId)
+                .orElseThrow(() -> new RuntimeException("Vermieter nicht gefunden!"));
+
+        //  Schritt 1: Dummy-Daten zum Testen (ohne DB)
+        List<UmsatzEvent> events = List.of(
+                new UmsatzEvent("Mercedes Benz C63 AMG", 500.0, "2026-01-15"),
+                new UmsatzEvent("VW Golf 8 GTI", 100.0, "2026-01-15")
+        );
+
+        double gesamt = events.stream().mapToDouble(UmsatzEvent::amount).sum();
+        return new UmsatzResponse(gesamt, events);
+    }
+
 }
