@@ -14,11 +14,32 @@ public class CarController {
     @Autowired
     private CarRepository carRepository;
 
-    // Alle Autos
+    // oben in der Klasse (z.B. nach @Autowired)
+    public record CarCustomerDto(
+            Long id,
+            String brand,
+            String model,
+            double pricePerDay,
+            boolean rented,
+            Long ownerId,
+            String ownerFirmenname
+    ) {}
+
     @GetMapping
-    public List<Car> getAllCars() {
-        return carRepository.findAll();
+    public List<CarCustomerDto> getAllCars() {
+        return carRepository.findAll().stream()
+                .map(car -> new CarCustomerDto(
+                        car.getId(),
+                        car.getBrand(),
+                        car.getModel(),
+                        car.getPricePerDay(),
+                        car.isRented(),
+                        car.getOwner() != null ? car.getOwner().getId() : null,
+                        car.getOwner() != null ? car.getOwner().getFirmenname() : null
+                ))
+                .toList();
     }
+
 
     // Autos eines bestimmten Vermieters
     @GetMapping("/vermieter/{ownerId}")
