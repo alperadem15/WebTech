@@ -74,7 +74,7 @@ public class CarController {
                     if (car.getOwner() == null) return "Fehler: Auto hat keinen Vermieter (Owner)!";
 
                     car.setRented(true);
-                    car.setRentedByKundeId(kundeId); // ✅ neu
+                    car.setRentedByKundeId(kundeId);
                     carRepository.save(car);
 
                     // ✅ Umsatz-Event speichern
@@ -87,11 +87,20 @@ public class CarController {
                 .orElse("Auto nicht gefunden!");
     }
 
-    // ✅ "Meine Miete"
+    // ✅ "Meine Miete" -> NIE 500, sondern 200 + null wenn keine Miete
     @GetMapping("/my-rental")
-    public Car getMyRental(@RequestParam Long kundeId) {
+    public CarCustomerDto getMyRental(@RequestParam Long kundeId) {
         return carRepository.findFirstByRentedByKundeIdAndRentedTrue(kundeId)
-                .orElseThrow(() -> new RuntimeException("Du hast aktuell kein Auto gemietet."));
+                .map(car -> new CarCustomerDto(
+                        car.getId(),
+                        car.getBrand(),
+                        car.getModel(),
+                        car.getPricePerDay(),
+                        car.isRented(),
+                        car.getOwner() != null ? car.getOwner().getId() : null,
+                        car.getOwner() != null ? car.getOwner().getFirmenname() : null
+                ))
+                .orElse(null);
     }
 
     // Auto löschen (nur Owner)
