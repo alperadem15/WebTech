@@ -14,6 +14,9 @@ public class CarController {
     @Autowired
     private CarRepository carRepository;
 
+    @Autowired
+    private UmsatzRepository umsatzRepository;
+
     // oben in der Klasse (z.B. nach @Autowired)
     public record CarCustomerDto(
             Long id,
@@ -68,12 +71,26 @@ public class CarController {
                     if (car.isRented()) {
                         return "Dieses Auto ist bereits vermietet!";
                     }
+
+                    // Auto muss einen Vermieter haben, sonst kein Umsatz zuordenbar
+                    if (car.getOwner() == null) {
+                        return "Fehler: Auto hat keinen Vermieter (Owner)!";
+                    }
+
                     car.setRented(true);
                     carRepository.save(car);
+
+                    // Umsatz-Event speichern (1 Event pro Miete)
+                    String carName = car.getBrand() + " " + car.getModel();
+                    double amount = car.getPricePerDay();
+
+                    umsatzRepository.save(new Umsatz(car.getOwner(), carName, amount));
+
                     return "Auto wurde erfolgreich gemietet!";
                 })
                 .orElse("Auto nicht gefunden!");
     }
+
 
     // Auto löschen (nur Owner)
     @DeleteMapping("/{id}")
