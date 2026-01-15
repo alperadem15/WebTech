@@ -16,6 +16,9 @@ public class Car {
     private double pricePerDay;
     private boolean rented = false;
 
+    // ✅ neu: welcher Kunde hat gemietet (für "Meine Miete")
+    private Long rentedByKundeId;
+
     @ManyToOne
     @JoinColumn(name = "owner_id")
     @JsonBackReference
@@ -43,6 +46,9 @@ public class Car {
 
     public boolean isRented() { return rented; }
     public void setRented(boolean rented) { this.rented = rented; }
+
+    public Long getRentedByKundeId() { return rentedByKundeId; }
+    public void setRentedByKundeId(Long rentedByKundeId) { this.rentedByKundeId = rentedByKundeId; }
 
     public Autovermieter getOwner() { return owner; }
     public void setOwner(Autovermieter owner) { this.owner = owner; }

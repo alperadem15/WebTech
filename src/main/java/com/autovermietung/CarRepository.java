@@ -6,12 +6,13 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 
-
 @Repository
 public interface CarRepository extends JpaRepository<Car, Long> {
-    List<Car> findByOwnerId(Long ownerId); // Alle Autos eines Vermieters
-    List<Car> findByRentedFalse();         // Nur verfügbare Autos
+    List<Car> findByOwnerId(Long ownerId);
+    List<Car> findByRentedFalse();
 
     Optional<Car> findByIdAndOwnerId(Long id, Long ownerId);
 
+    // "Meine Miete"
+    Optional<Car> findFirstByRentedByKundeIdAndRentedTrue(Long rentedByKundeId);
 }

@@ -19,7 +19,7 @@ public class CarController {
     @Autowired
     private UmsatzRepository umsatzRepository;
 
-    // oben in der Klasse (z.B. nach @Autowired)
+    // Kunden DTO (mit Firmenname)
     public record CarCustomerDto(
             Long id,
             String brand,
@@ -45,7 +45,6 @@ public class CarController {
                 .toList();
     }
 
-
     // Autos eines bestimmten Vermieters
     @GetMapping("/vermieter/{ownerId}")
     public List<Car> getCarsByOwner(@PathVariable Long ownerId) {
@@ -62,30 +61,25 @@ public class CarController {
     @PostMapping
     public Car addCar(@RequestBody Car car) {
         car.setRented(false);
+        car.setRentedByKundeId(null);
         return carRepository.save(car);
     }
 
-    // ❗ Auto mieten (Kunde)
+    // ✅ Auto mieten (Kunde) -> jetzt mit kundeId
     @PostMapping("/rent/{id}")
-    public String rentCar(@PathVariable Long id) {
+    public String rentCar(@PathVariable Long id, @RequestParam Long kundeId) {
         return carRepository.findById(id)
                 .map(car -> {
-                    if (car.isRented()) {
-                        return "Dieses Auto ist bereits vermietet!";
-                    }
-
-                    // Auto muss einen Vermieter haben, sonst kein Umsatz zuordenbar
-                    if (car.getOwner() == null) {
-                        return "Fehler: Auto hat keinen Vermieter (Owner)!";
-                    }
+                    if (car.isRented()) return "Dieses Auto ist bereits vermietet!";
+                    if (car.getOwner() == null) return "Fehler: Auto hat keinen Vermieter (Owner)!";
 
                     car.setRented(true);
+                    car.setRentedByKundeId(kundeId); // ✅ neu
                     carRepository.save(car);
 
-                    // Umsatz-Event speichern (1 Event pro Miete)
+                    // ✅ Umsatz-Event speichern
                     String carName = car.getBrand() + " " + car.getModel();
                     double amount = car.getPricePerDay();
-
                     umsatzRepository.save(new Umsatz(car.getOwner(), carName, amount));
 
                     return "Auto wurde erfolgreich gemietet!";
@@ -93,6 +87,12 @@ public class CarController {
                 .orElse("Auto nicht gefunden!");
     }
 
+    // ✅ "Meine Miete"
+    @GetMapping("/my-rental")
+    public Car getMyRental(@RequestParam Long kundeId) {
+        return carRepository.findFirstByRentedByKundeIdAndRentedTrue(kundeId)
+                .orElseThrow(() -> new RuntimeException("Du hast aktuell kein Auto gemietet."));
+    }
 
     // Auto löschen (nur Owner)
     @DeleteMapping("/{id}")
@@ -112,6 +112,12 @@ public class CarController {
                 .orElseThrow(() -> new RuntimeException("Auto nicht gefunden oder nicht dein Auto!"));
 
         car.setRented(rented);
+
+        // wenn Owner manuell auf "nicht vermietet" setzt -> Zuordnung löschen
+        if (!rented) {
+            car.setRentedByKundeId(null);
+        }
+
         return carRepository.save(car);
     }
 }

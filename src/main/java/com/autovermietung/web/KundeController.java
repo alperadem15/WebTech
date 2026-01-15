@@ -28,13 +28,15 @@ public class KundeController {
 
     // Login
     @PostMapping("/login")
-    public String login(@RequestBody Kunde loginRequest) {
-        Optional<Kunde> kunde = kundeRepository.findByEmail(loginRequest.getEmail());
-        if (kunde.isPresent() && kunde.get().getPassword().equals(loginRequest.getPassword())) {
-            return "Login erfolgreich!";
-        }
-        return "Email oder Passwort falsch!";
+    public LoginResponse login(@RequestBody Kunde loginRequest) {
+        Kunde k = kundeRepository.findByEmail(loginRequest.getEmail())
+                .filter(x -> x.getPassword().equals(loginRequest.getPassword()))
+                .orElseThrow(() -> new RuntimeException("Email oder Passwort falsch!"));
+
+        return new LoginResponse(k.getId(), "Login erfolgreich!");
     }
+
+    public record LoginResponse(Long kundeId, String message) {}
 
     // Alle Kunden (optional)
     @GetMapping("/all")
