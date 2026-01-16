@@ -1,5 +1,5 @@
 # --- Build Stage ---
-FROM eclipse-temurin:23-jdk AS build
+FROM eclipse-temurin:21-jdk AS build
 WORKDIR /app
 
 COPY gradlew build.gradle settings.gradle /app/
