@@ -6,6 +6,7 @@ import com.autovermietung.Umsatz;
 import com.autovermietung.UmsatzRepository;
 import com.autovermietung.user.Autovermieter;
 import com.autovermietung.user.AutovermieterRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,16 +25,23 @@ public class AutovermieterController {
     @Autowired
     private UmsatzRepository umsatzRepository;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     @PostMapping("/register")
     public Autovermieter register(@RequestBody Autovermieter vermieter) {
+        vermieter.setPassword(passwordEncoder.encode(vermieter.getPassword()));
         return vermieterRepository.save(vermieter);
     }
 
     @PostMapping("/login")
     public LoginResponse login(@RequestBody Autovermieter loginRequest) {
         Autovermieter v = vermieterRepository.findByEmail(loginRequest.getEmail())
-                .filter(x -> x.getPassword().equals(loginRequest.getPassword()))
                 .orElseThrow(() -> new RuntimeException("Email oder Passwort falsch!"));
+
+        if (!passwordEncoder.matches(loginRequest.getPassword(), v.getPassword())) {
+            throw new RuntimeException("Email oder Passwort falsch!");
+        }
 
         return new LoginResponse(v.getId(), "Login erfolgreich!");
     }
